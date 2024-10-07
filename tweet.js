@@ -1,5 +1,5 @@
-const { execSync } = require('child_process');
-const axios = require('axios');
+import { execSync } from 'child_process';
+import axios from 'axios';
 
 let latestFile;
 let commitMessage;
