@@ -1,5 +1,12 @@
-import { execSync } from 'child_process';
-import axios from 'axios';
+const Twitter = require('twitter-lite');
+const { execSync } = require('child_process');
+
+const client = new Twitter({
+  consumer_key: process.env.TWITTER_CONSUMER_KEY,
+  consumer_secret: process.env.TWITTER_CONSUMER_SECRET,
+  access_token_key: process.env.TWITTER_ACCESS_TOKEN,
+  access_token_secret: process.env.TWITTER_ACCESS_TOKEN_SECRET
+});
 
 let latestFile;
 let commitMessage;
@@ -18,17 +25,10 @@ try {
 // ツイート内容を設定
 const tweetText = `New commit for ${latestFile}: ${commitMessage}`;
 
-axios.post('https://api.twitter.com/2/tweets', {
-    text: tweetText
-}, {
-    headers: {
-        'Authorization': `Bearer ${process.env.TWITTER_BEARER_TOKEN}`,
-        'Content-Type': 'application/json'
-    }
-})
-.then(response => {
-    console.log('Tweeted successfully!', response.data);
-})
-.catch(error => {
-    console.error('Error posting tweet:', error.response ? error.response.data : error.message);
-});
+client.post("statuses/update", { status: tweetText })
+    .then(result => {
+        console.log("Tweeted successfully!", result);
+    })
+    .catch(error => {
+        console.error("Error posting tweet:", error);
+    });
