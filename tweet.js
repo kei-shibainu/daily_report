@@ -12,8 +12,16 @@ const twitterClient = new TwitterApi({
 
 // 最新のコミットで変更されたMarkdownファイルのパスを取得
 const getLatestMarkdownFilePath = () => {
-  // コミットの履歴を確認
-  const output = execSync('git diff --name-only HEAD~1 HEAD').toString();
+  let output;
+
+  // 最新のコミットで変更されたファイルを取得
+  try {
+    output = execSync('git diff --name-only HEAD~1 HEAD').toString();
+  } catch (error) {
+    console.error('Error fetching latest files:', error.message);
+    output = ''; // 初回実行時のため空の出力
+  }
+
   const files = output.split('\n').filter(Boolean);
   return files.find(file => file.endsWith('.md')); // .mdファイルを探す
 };
@@ -21,8 +29,16 @@ const getLatestMarkdownFilePath = () => {
 (async () => {
   try {
     const latestFilePath = getLatestMarkdownFilePath();
+
+    // 最新のMarkdownファイルが見つからない場合、全ての.mdファイルを取得
     if (!latestFilePath) {
-      console.log('No markdown file changed in the latest commit.');
+      console.log('No markdown file changed in the latest commit. Trying to fetch all markdown files...');
+      const allMarkdownFiles = execSync('git ls-files "*.md"').toString().split('\n').filter(Boolean);
+      latestFilePath = allMarkdownFiles[0]; // 最初の.mdファイルを選択
+    }
+
+    if (!latestFilePath) {
+      console.log('No markdown files found.');
       process.exit(0);
     }
 
