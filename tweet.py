@@ -65,7 +65,7 @@ if latest_md_file:
 
     # ツイートを投稿
     try:
-        client.create_tweet(text=content)
+        client.create_tweet(text=tweet_content)
         print('Tweet sent successfully!')
     except tweepy.errors.Forbidden as e:
         print('Error posting tweet: Forbidden', e)
