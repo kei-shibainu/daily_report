@@ -1,34 +1,36 @@
-const Twitter = require('twitter-lite');
-const { execSync } = require('child_process');
+const { TwitterApi } = require('twitter-api-v2');
+const fs = require('fs');
+const path = require('path');
 
-const client = new Twitter({
-  consumer_key: process.env.TWITTER_CONSUMER_KEY,
-  consumer_secret: process.env.TWITTER_CONSUMER_SECRET,
-  access_token_key: process.env.TWITTER_ACCESS_TOKEN,
-  access_token_secret: process.env.TWITTER_ACCESS_TOKEN_SECRET
+const twitterClient = new TwitterApi({
+  appKey: process.env.TWITTER_API_KEY,
+  appSecret: process.env.TWITTER_API_SECRET_KEY,
+  accessToken: process.env.TWITTER_ACCESS_TOKEN,
+  accessSecret: process.env.TWITTER_ACCESS_TOKEN_SECRET,
 });
 
-let latestFile;
-let commitMessage;
+// 最新のコミットで変更されたファイルのパスを取得する関数
+const getLatestFilePath = async () => {
+  const { execSync } = require('child_process');
+  const output = execSync('git diff --name-only HEAD^ HEAD').toString();
+  const files = output.split('\n').filter(Boolean);
+  return files.find(file => file.endsWith('.md')); // .mdファイルを探す
+};
 
-try {
-    // 最新のMarkdownファイルを取得
-    latestFile = execSync('git log --name-only --pretty=format: | grep ".md" | sort -u | tail -n 1').toString().trim();
-    
-    // 最新のファイルのコミットメッセージを取得
-    commitMessage = execSync(`git log -1 --pretty=format:"%s" -- ${latestFile}`).toString();
-} catch (error) {
-    console.error('Error retrieving file or commit message:', error);
-    process.exit(1);
-}
+(async () => {
+  try {
+    const latestFilePath = await getLatestFilePath();
+    if (!latestFilePath) {
+      console.log('No markdown file changed in the latest commit.');
+      process.exit(0);
+    }
 
-// ツイート内容を設定
-const tweetText = `New commit for ${latestFile}: ${commitMessage}`;
+    const fileContent = fs.readFileSync(path.join(__dirname, latestFilePath), 'utf8');
 
-client.post("statuses/update", { status: tweetText })
-    .then(result => {
-        console.log("Tweeted successfully!", result);
-    })
-    .catch(error => {
-        console.error("Error posting tweet:", error);
-    });
+    // ツイートを送信
+    await twitterClient.v1.tweet(fileContent);
+    console.log('Tweet sent successfully!');
+  } catch (error) {
+    console.error('Error sending tweet:', error);
+  }
+})();
