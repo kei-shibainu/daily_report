@@ -18,24 +18,26 @@ const getLatestMarkdownFilePath = () => {
   try {
     output = execSync('git diff --name-only HEAD~1 HEAD').toString();
   } catch (error) {
-    console.error('Error fetching latest files:', error.message);
-    output = ''; // 初回実行時のため空の出力
+    console.error('Error fetching latest files, may be first commit:', error.message);
+    output = ''; // エラーの場合は空にする
   }
 
   const files = output.split('\n').filter(Boolean);
-  return files.find(file => file.endsWith('.md')); // .mdファイルを探す
+  const latestMarkdownFile = files.find(file => file.endsWith('.md'));
+
+  // 最新のMarkdownファイルが見つからなかった場合、全ての.mdファイルを取得
+  if (!latestMarkdownFile) {
+    console.log('No markdown file changed in the latest commit. Trying to fetch all markdown files...');
+    const allMarkdownFiles = execSync('git ls-files "*.md"').toString().split('\n').filter(Boolean);
+    return allMarkdownFiles[0]; // 最初の.mdファイルを選択
+  }
+
+  return latestMarkdownFile;
 };
 
 (async () => {
   try {
     const latestFilePath = getLatestMarkdownFilePath();
-
-    // 最新のMarkdownファイルが見つからない場合、全ての.mdファイルを取得
-    if (!latestFilePath) {
-      console.log('No markdown file changed in the latest commit. Trying to fetch all markdown files...');
-      const allMarkdownFiles = execSync('git ls-files "*.md"').toString().split('\n').filter(Boolean);
-      latestFilePath = allMarkdownFiles[0]; // 最初の.mdファイルを選択
-    }
 
     if (!latestFilePath) {
       console.log('No markdown files found.');
