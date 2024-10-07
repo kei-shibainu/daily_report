@@ -20,8 +20,8 @@ client = tweepy.Client(
 
 # 最新の.mdファイルを取得
 def get_latest_markdown_file():
-    # カレントディレクトリ内のすべての.mdファイルを取得
-    markdown_files = glob.glob('*.md')
+    # サブフォルダ内のすべての.mdファイルを再帰的に取得
+    markdown_files = glob.glob('**/*.md', recursive=True)
     
     # ファイルが存在しない場合
     if not markdown_files:
