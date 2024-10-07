@@ -3,11 +3,11 @@ import os
 import glob
 
 # Twitter APIのキーとトークンを環境変数から取得
-ck = os.environ['X_API_KEY']
-cs = os.environ['X_API_KEY_SECRET']
-bt = os.environ['X_BEARER_TOKEN']
-at = os.environ['X_ACCESS_TOKEN']
-ats = os.environ['X_ACCESS_TOKEN_SECRET']
+ck = os.environ['TWITTER_CONSUMER_KEY']
+cs = os.environ['TWITTER_CONSUMER_SECRET']
+bt = os.environ['TWITTER_BEARER_TOKEN']
+at = os.environ['TWITTER_ACCESS_TOKEN']
+ats = os.environ['TWITTER_ACCESS_TOKEN_SECRET']
 
 # Twitter APIのクライアントを初期化
 client = tweepy.Client(
