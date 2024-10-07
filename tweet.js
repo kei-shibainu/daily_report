@@ -1,7 +1,9 @@
 const { TwitterApi } = require('twitter-api-v2');
 const fs = require('fs');
 const path = require('path');
+const { execSync } = require('child_process');
 
+// GitHub SecretsからTwitter APIの情報を取得
 const twitterClient = new TwitterApi({
   appKey: process.env.TWITTER_API_KEY,
   appSecret: process.env.TWITTER_API_SECRET_KEY,
@@ -9,9 +11,8 @@ const twitterClient = new TwitterApi({
   accessSecret: process.env.TWITTER_ACCESS_TOKEN_SECRET,
 });
 
-// 最新のコミットで変更されたファイルのパスを取得する関数
-const getLatestFilePath = async () => {
-  const { execSync } = require('child_process');
+// 最新のコミットで変更されたMarkdownファイルのパスを取得
+const getLatestMarkdownFilePath = () => {
   const output = execSync('git diff --name-only HEAD^ HEAD').toString();
   const files = output.split('\n').filter(Boolean);
   return files.find(file => file.endsWith('.md')); // .mdファイルを探す
@@ -19,7 +20,7 @@ const getLatestFilePath = async () => {
 
 (async () => {
   try {
-    const latestFilePath = await getLatestFilePath();
+    const latestFilePath = getLatestMarkdownFilePath();
     if (!latestFilePath) {
       console.log('No markdown file changed in the latest commit.');
       process.exit(0);
