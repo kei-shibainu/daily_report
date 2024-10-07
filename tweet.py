@@ -56,8 +56,12 @@ if latest_md_file:
         content = file.read()
 
     # ツイート内容をトリミング
-    if len(content) > 280:
-        content = content[:277] + '...'  # トリミングして「...」を追加
+    if len(content) > 257:
+        content = content[:254] + '...'  # トリミングして「...」を追加
+
+    # ハッシュタグを追加
+    hashtags = "#今日の積み上げ #HappinessChain"
+    tweet_content = f"{content}\n\n{hashtags}"
 
     # ツイートを投稿
     try:
